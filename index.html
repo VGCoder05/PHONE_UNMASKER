@@ -199,6 +199,7 @@
 
         table {
             width: 100%;
+            overflow-x: auto;
             border-collapse: collapse;
             font-size: 13px;
         }
@@ -318,6 +319,8 @@
             }
         }
     </style>
+
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -347,7 +350,7 @@
                 <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search orders...">
                 <span class="record-count" id="recordCount">0 Records</span>
                 <div>
-                    <button class="btn btn-export" onclick="exportToCSV()">📥 Export CSV</button>
+                    <button class="btn btn-export" onclick="exportToXLSX()">📥 Export Excel</button>
                     <button class="btn btn-clear" onclick="clearTable()">🗑️ Clear</button>
                 </div>
             </div>
@@ -356,7 +359,9 @@
                     <tr>
                         <th>#</th>
                         <th>Order</th>
+                        <th>CustomerId</th>
                         <th>Customer</th>
+                        <th>Address</th>
                         <th>Pincode</th>
                         <th>Phone</th>
                         <th>Alternate Phone</th>
@@ -448,6 +453,7 @@
             }
 
             const entries = xmlDoc.getElementsByTagName('entry');
+            // console.log("entries : ", entries)
             allData = [];
 
             for (let i = 0; i < entries.length; i++) {
@@ -455,6 +461,7 @@
                 const data = extractData(entry);
                 allData.push(data);
             }
+            console.log("allData : ", allData)
 
             if (allData.length === 0) {
                 // Try to parse as single entry
@@ -492,7 +499,9 @@
         }
 
         function extractData(entry) {
+            // console.log("entry in extractData : ", entry)
             const getValue = (tagName) => {
+                // console.log("tagName : ", tagName)
                 const elements = entry.getElementsByTagName('d:' + tagName);
                 if (elements.length > 0) {
                     return elements[0].textContent || '';
@@ -502,7 +511,9 @@
 
             return {
                 orderId: getValue('OrderId'),
+                customerId: getValue('CustomerId'),
                 customerName: getValue('CustomerName'),
+                customerAddress: getValue('CustomerAddress'),
                 customerPin: getValue('CustomerPin'),
                 customerPhone: getValue('CustomerTelephone'),
                 alternatePhone: getValue('CustomerAlternateNo'),
@@ -600,6 +611,7 @@
 
         function displayData(data) {
             tableBody.innerHTML = '';
+            // console.log("data : ", data)
 
             if (data.length === 0) {
                 tableBody.innerHTML = '<tr><td colspan="17" class="no-data">No data found in the file</td></tr>';
@@ -618,6 +630,7 @@
 
         function createTableRow(item, index) {
             const row = document.createElement('tr');
+            // console.log("item : ", item)
 
             const statusClass = getStatusClass(item.status);
             const priorityClass = getPriorityClass(item.callPriority);
@@ -625,7 +638,9 @@
             row.innerHTML = `
                 <td>${index}</td>
                 <td><strong>${item.orderId || 'N/A'}</strong></td>
+                <td><strong>${item.customerId || 'N/A'}</strong></td>
                 <td title="${item.customerName}">${item.customerName || 'N/A'}</td>
+                <td title="${item.customerAddress}">${item.customerAddress || 'N/A'}</td>
                 <td>${item.customerPin || 'N/A'}</td>
                 <td>${item.customerPhone || 'N/A'}</td>
                 <td>${item.alternatePhone || 'N/A'}</td>
@@ -677,7 +692,48 @@
             displayData(filteredData);
         });
 
-        function exportToCSV() {
+        // function exportToCSV() {
+        // if (allData.length === 0) {
+        //     alert('No data to export!');
+        //     return;
+        // }
+
+        // const headers = ['Order', 'Customer', 'Pincode', 'Phone', 'Alternate Phone', 'Product', 'Machine', 'Status', 'Created Date', 'Appointment Date', 'Technician', 'Source', 'Call Priority', 'Is Call Made', 'Call Status', 'Call Details'];
+
+        // let csv = headers.join(',') + '\n';
+
+        // allData.forEach(item => {
+        //     const row = [
+        //         item.orderId,
+        //         `"${item.customerName}"`,
+        //         item.customerPin,
+        //         item.customerPhone,
+        //         item.alternatePhone,
+        //         `"${item.productDesc}"`,
+        //         `"${item.modelName}"`,
+        //         `"${item.status}"`,
+        //         item.createdDate,
+        //         item.appointmentDate,
+        //         `"${item.technician}"`,
+        //         item.source,
+        //         `"${item.callPriority}"`,
+        //         item.isCallMade,
+        //         item.callStatus,
+        //         `"${item.callDetails}"`
+        //     ];
+        //     csv += row.join(',') + '\n';
+        // });
+
+        // const blob = new Blob([csv], { type: 'text/csv' });
+        // const url = window.URL.createObjectURL(blob);
+        // const a = document.createElement('a');
+        // a.href = url;
+        // a.download = 'service_orders.csv';
+        // a.click();
+        // window.URL.revokeObjectURL(url);
+        // }
+
+        function exportToXLSX() {
             if (allData.length === 0) {
                 alert('No data to export!');
                 return;
@@ -685,37 +741,50 @@
 
             const headers = ['Order', 'Customer', 'Pincode', 'Phone', 'Alternate Phone', 'Product', 'Machine', 'Status', 'Created Date', 'Appointment Date', 'Technician', 'Source', 'Call Priority', 'Is Call Made', 'Call Status', 'Call Details'];
 
-            let csv = headers.join(',') + '\n';
+            // Build rows array (array of arrays)
+            const rows = allData.map(item => [
+                item.orderId,
+                item.customerId,
+                item.customerName,
+                item.customerAddress,
+                item.customerPin,
+                item.customerPhone,
+                item.alternatePhone,
+                item.productDesc,
+                item.modelName,
+                item.status,
+                item.createdDate,
+                item.appointmentDate,
+                item.technician,
+                item.source,
+                item.callPriority,
+                item.isCallMade,
+                item.callStatus,
+                item.callDetails
+            ]);
 
-            allData.forEach(item => {
-                const row = [
-                    item.orderId,
-                    `"${item.customerName}"`,
-                    item.customerPin,
-                    item.customerPhone,
-                    item.alternatePhone,
-                    `"${item.productDesc}"`,
-                    `"${item.modelName}"`,
-                    `"${item.status}"`,
-                    item.createdDate,
-                    item.appointmentDate,
-                    `"${item.technician}"`,
-                    item.source,
-                    `"${item.callPriority}"`,
-                    item.isCallMade,
-                    item.callStatus,
-                    `"${item.callDetails}"`
-                ];
-                csv += row.join(',') + '\n';
+            // Combine headers + data
+            const worksheetData = [headers, ...rows];
+
+            // Create workbook and worksheet
+            const workbook = XLSX.utils.book_new();
+            const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+
+            // Optional: Auto-fit column widths based on content
+            const colWidths = headers.map((header, i) => {
+                const maxLength = Math.max(
+                    header.length,
+                    ...rows.map(row => (row[i] != null ? String(row[i]).length : 0))
+                );
+                return { wch: Math.min(maxLength + 2, 50) }; // cap at 50 chars
             });
+            worksheet['!cols'] = colWidths;
 
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'service_orders.csv';
-            a.click();
-            window.URL.revokeObjectURL(url);
+            // Append worksheet to workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Service Orders');
+
+            // Trigger download
+            XLSX.writeFile(workbook, 'service_orders.xlsx');
         }
 
         function clearTable() {
