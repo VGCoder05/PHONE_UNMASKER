@@ -109,8 +109,15 @@
         }
 
         @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
 
         h1 {
@@ -362,7 +369,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* Preview Styles */
@@ -506,12 +515,12 @@
             .container {
                 padding: 20px 15px;
             }
-            
+
             .data-row {
                 flex-direction: column;
                 gap: 5px;
             }
-            
+
             .data-label {
                 flex: none;
             }
@@ -546,15 +555,15 @@
                     <label class="input-label">Enter Ticket Number</label>
                     <div class="input-wrapper">
                         <span class="input-prefix">📋</span>
-                        <input type="text" class="order-input" id="orderNumber" 
-                               placeholder="1019049900" maxlength="15">
+                        <input type="text" class="order-input" id="orderNumber" placeholder="1019049900" maxlength="15">
                     </div>
                 </div>
 
                 <div class="url-preview">
                     <div class="url-preview-label">Generated URL</div>
                     <div class="url-preview-text" id="urlPreview">
-                        https://ifbwebdpprd.ifbserv.com:44300/sap/opu/odata/sap/ZUI002_SRV/Headers('<span class="url-highlight" id="urlNumber">XXXXXXXXXX</span>')/Update1
+                        https://ifbwebdpprd.ifbserv.com:44300/sap/opu/odata/sap/ZUI002_SRV/Headers('<span
+                            class="url-highlight" id="urlNumber">XXXXXXXXXX</span>')/Update1
                     </div>
                 </div>
 
@@ -570,8 +579,8 @@
                             <input type="radio" id="proxyVercel" name="proxyType" value="vercel">
                             <label for="proxyVercel">Your Vercel Proxy - Production</label>
                         </div>
-                        <input type="text" class="custom-proxy-input" id="vercelProxyUrl" 
-                               placeholder="https://cors-proxy-three-livid.vercel.app/api/proxy?url=">
+                        <input type="text" class="custom-proxy-input" id="vercelProxyUrl"
+                            placeholder="https://cors-proxy-three-livid.vercel.app/api/proxy?url=">
                     </div>
                 </div>
 
@@ -599,7 +608,7 @@
             <!-- Right Panel - Preview Section -->
             <div class="preview-container">
                 <h2>📄 Data Preview</h2>
-                
+
                 <div id="previewContent">
                     <div class="preview-empty">
                         <div class="preview-empty-icon">📭</div>
@@ -623,17 +632,17 @@
         // ============================================
         // CONFIGURATION - Change these as needed
         // ============================================
-        
+
         const CONFIG = {
             // Public CORS proxy (for testing)
             publicProxy: 'https://corsproxy.io/?',
-            
+
             // Your Vercel proxy (replace with your actual URL after deploying)
-            vercelProxy: '', // e.g., 'https://my-cors-proxy.vercel.app/api/proxy?url='
-            
+            vercelProxy: 'https://cors-proxy-three-livid.vercel.app/proxy?url=', // e.g., 'https://my-cors-proxy.vercel.app/api/proxy?url='
+
             // Base URL for the API
             baseUrl: 'https://ifbwebdpprd.ifbserv.com:44300/sap/opu/odata/sap/ZUI002_SRV/Headers',
-            
+
             // URL suffix
             urlSuffix: '/Update1'
         };
@@ -641,7 +650,7 @@
         // ============================================
         // DOM ELEMENTS
         // ============================================
-        
+
         const orderInput = document.getElementById('orderNumber');
         const urlNumber = document.getElementById('urlNumber');
         const statusMessage = document.getElementById('statusMessage');
@@ -655,7 +664,7 @@
         // ============================================
 
         // Update URL preview on input change
-        orderInput.addEventListener('input', function() {
+        orderInput.addEventListener('input', function () {
             const value = this.value.replace(/[^0-9]/g, '');
             this.value = value;
             urlNumber.textContent = value || 'XXXXXXXXXX';
@@ -663,7 +672,7 @@
 
         // Show/hide Vercel proxy input based on selection
         document.querySelectorAll('input[name="proxyType"]').forEach(radio => {
-            radio.addEventListener('change', function() {
+            radio.addEventListener('change', function () {
                 if (this.value === 'vercel') {
                     vercelProxyInput.classList.add('visible');
                 } else {
@@ -673,7 +682,7 @@
         });
 
         // Enter key to fetch
-        orderInput.addEventListener('keypress', function(e) {
+        orderInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 fetchXMLData();
             }
@@ -696,13 +705,15 @@
             if (!targetUrl) return null;
 
             const proxyType = document.querySelector('input[name="proxyType"]:checked').value;
-            
+
             if (proxyType === 'vercel') {
-                const vercelUrl = vercelProxyInput.value.trim();
-                if (!vercelUrl) {
-                    showStatus('error', 'Please enter your Vercel proxy URL');
-                    return null;
-                }
+                vercelProxyInput.value = CONFIG.vercelProxy + encodeURIComponent(targetUrl);
+                // if (!vercelUrl) {
+                //     showStatus('error', 'Please enter your Vercel proxy URL');
+                //     return null;
+                // }
+
+                // console.log("vercelUrl + encodeURIComponent(targetUrl) : ", CONFIG.vercelProxy + encodeURIComponent(targetUrl))
                 return vercelUrl + encodeURIComponent(targetUrl);
             } else {
                 return CONFIG.publicProxy + encodeURIComponent(targetUrl);
@@ -753,6 +764,9 @@
                 // STEP 1: Fetch through proxy
                 const response = await fetch(proxiedUrl);
 
+                // console.log("proxiedUrl : ", proxiedUrl)
+                // console.log("response : ", response)
+
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
@@ -777,14 +791,14 @@
 
             } catch (error) {
                 console.error('Fetch error:', error);
-                
+
                 let errorMsg = error.message;
                 if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
                     errorMsg = 'Network error. The proxy might be blocked or unavailable.';
                 }
-                
+
                 showStatus('error', errorMsg);
-                
+
                 // Show error in preview
                 previewContent.innerHTML = `
                     <div class="preview-empty">
@@ -890,7 +904,7 @@
             // Try to find the main content element
             // Common patterns: entry > content > properties, or direct elements
             let properties = xmlDoc.querySelector('m\\:properties, properties');
-            
+
             if (!properties) {
                 // Try to get all elements in the document
                 properties = xmlDoc.documentElement;
@@ -899,7 +913,7 @@
             if (properties) {
                 // Get all child elements
                 const children = properties.children;
-                
+
                 for (let i = 0; i < children.length; i++) {
                     const element = children[i];
                     const tagName = element.localName || element.tagName.replace(/^.*:/, '');
@@ -915,7 +929,7 @@
                     const lowerTag = tagName.toLowerCase();
 
                     // Basic fields
-                    if (lowerTag.includes('order') || lowerTag.includes('ticket') || 
+                    if (lowerTag.includes('order') || lowerTag.includes('ticket') ||
                         lowerTag.includes('id') || lowerTag.includes('number') ||
                         lowerTag.includes('date') || lowerTag.includes('status') ||
                         lowerTag.includes('type') || lowerTag.includes('priority')) {
@@ -923,24 +937,24 @@
                     }
                     // Customer fields
                     else if (lowerTag.includes('customer') || lowerTag.includes('name') ||
-                             lowerTag.includes('phone') || lowerTag.includes('mobile') ||
-                             lowerTag.includes('email') || lowerTag.includes('address') ||
-                             lowerTag.includes('city') || lowerTag.includes('pin') ||
-                             lowerTag.includes('state')) {
+                        lowerTag.includes('phone') || lowerTag.includes('mobile') ||
+                        lowerTag.includes('email') || lowerTag.includes('address') ||
+                        lowerTag.includes('city') || lowerTag.includes('pin') ||
+                        lowerTag.includes('state')) {
                         data.customer[tagName] = value;
                     }
                     // Product fields
                     else if (lowerTag.includes('product') || lowerTag.includes('model') ||
-                             lowerTag.includes('serial') || lowerTag.includes('brand') ||
-                             lowerTag.includes('category') || lowerTag.includes('item') ||
-                             lowerTag.includes('material')) {
+                        lowerTag.includes('serial') || lowerTag.includes('brand') ||
+                        lowerTag.includes('category') || lowerTag.includes('item') ||
+                        lowerTag.includes('material')) {
                         data.product[tagName] = value;
                     }
                     // Service fields
                     else if (lowerTag.includes('service') || lowerTag.includes('technician') ||
-                             lowerTag.includes('engineer') || lowerTag.includes('complaint') ||
-                             lowerTag.includes('problem') || lowerTag.includes('action') ||
-                             lowerTag.includes('remark') || lowerTag.includes('note')) {
+                        lowerTag.includes('engineer') || lowerTag.includes('complaint') ||
+                        lowerTag.includes('problem') || lowerTag.includes('action') ||
+                        lowerTag.includes('remark') || lowerTag.includes('note')) {
                         data.service[tagName] = value;
                     }
                 }
@@ -954,9 +968,9 @@
             let rows = '';
             for (const [key, value] of Object.entries(dataObj)) {
                 const formattedKey = formatFieldName(key);
-                const isHighlight = key.toLowerCase().includes('status') || 
-                                   key.toLowerCase().includes('priority');
-                
+                const isHighlight = key.toLowerCase().includes('status') ||
+                    key.toLowerCase().includes('priority');
+
                 rows += `
                     <div class="data-row">
                         <div class="data-label">${formattedKey}</div>
@@ -980,7 +994,7 @@
             let formatted = '';
             let indent = '';
             const tab = '  ';
-            
+
             xml.split(/>\s*</).forEach(node => {
                 if (node.match(/^\/\w/)) {
                     indent = indent.substring(tab.length);
@@ -990,7 +1004,7 @@
                     indent += tab;
                 }
             });
-            
+
             return formatted.substring(1, formatted.length - 2);
         }
 
@@ -1003,7 +1017,7 @@
         // Open URL directly in browser
         function openInBrowser() {
             const targetUrl = getTargetURL();
-            
+
             if (!targetUrl) {
                 showStatus('error', 'Please enter a ticket number');
                 return;
@@ -1017,7 +1031,7 @@
         // INITIALIZE
         // ============================================
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Load saved Vercel proxy URL if any
             const savedProxy = localStorage.getItem('vercelProxyUrl');
             if (savedProxy) {
@@ -1025,7 +1039,7 @@
             }
 
             // Save Vercel proxy URL on change
-            vercelProxyInput.addEventListener('change', function() {
+            vercelProxyInput.addEventListener('change', function () {
                 localStorage.setItem('vercelProxyUrl', this.value);
             });
         });
