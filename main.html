@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XML to Table Converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .navbar {
+            padding: 15px 30px;
+
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .nav-brand {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-link {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .nav-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(240, 147, 251, 0.4);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(240, 147, 251, 0.6);
+        }
+
+        .drop-zone {
+            background: white;
+            border: 3px dashed #667eea;
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .drop-zone:hover {
+            background: #f0f4ff;
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+
+        .drop-zone.dragover {
+            background: #e8f0fe;
+            border-color: #4CAF50;
+            border-style: solid;
+        }
+
+        .drop-zone-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .drop-zone-text {
+            font-size: 20px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .drop-zone-hint {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow-x: auto;
+            display: none;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .table-title {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .record-count {
+            background: #667eea;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-export {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-export:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-clear {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #da190b;
+            transform: translateY(-2px);
+        }
+
+        table {
+            width: 100%;
+            overflow-x: auto;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+
+        th {
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        td:hover {
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        tbody tr:hover {
+            background: #f5f5f5;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        tbody tr:nth-child(even):hover {
+            background: #f0f0f0;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .status-resolved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-open {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .priority-high {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .priority-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .priority-low {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .search-box {
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            width: 300px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .drop-zone {
+                padding: 40px 20px;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .table-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- Navigation Bar - Add to both files -->
+        <nav class="navbar">
+            <div class="nav-brand">🔧 IFB Service Tools</div>
+            <h1>📊 XML to Table Converter</h1>
+            <div class="nav-links">
+                <a href="main.html" class="nav-link">📊 XML Parser</a>
+                <a href="xml_downloader.html" class="nav-link">📥 XML Downloader</a>
+            </div>
+        </nav>
+
+
+        <div class="drop-zone" id="dropZone">
+            <div class="drop-zone-icon">📁</div>
+            <div class="drop-zone-text">Drag & Drop your XML file here</div>
+            <div class="drop-zone-hint">or click to browse files</div>
+            <input type="file" class="file-input" id="fileInput" accept=".xml,.txt">
+        </div>
+
+        <div class="table-container" id="tableContainer">
+            <div class="table-header">
+                <h2 class="table-title">📋 Service Orders</h2>
+                <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search orders...">
+                <span class="record-count" id="recordCount">0 Records</span>
+                <div>
+                    <button class="btn btn-export" onclick="exportToXLSX()">📥 Export Excel</button>
+                    <button class="btn btn-clear" onclick="clearTable()">🗑️ Clear</button>
+                </div>
+            </div>
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Order</th>
+                        <th>CustomerId</th>
+                        <th>Customer</th>
+                        <th>Address</th>
+                        <th>Pincode</th>
+                        <th>Phone</th>
+                        <th>Alternate Phone</th>
+                        <th>Product</th>
+                        <th>Machine</th>
+                        <th>Status</th>
+                        <th>Created Date</th>
+                        <th>Appointment Date</th>
+                        <th>Technician</th>
+                        <th>Source</th>
+                        <th>Call Priority</th>
+                        <th>Is Call Made</th>
+                        <th>Call Status</th>
+                        <th>Call Details</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const tableContainer = document.getElementById('tableContainer');
+        const tableBody = document.getElementById('tableBody');
+        const recordCount = document.getElementById('recordCount');
+        const searchBox = document.getElementById('searchBox');
+
+        let allData = [];
+
+        // Drop zone events
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) processFile(file);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) processFile(file);
+        });
+
+        function processFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                parseXML(content);
+            };
+            reader.readAsText(file);
+        }
+
+        function parseXML(xmlString) {
+            // Clean up the XML string
+            let cleanXML = xmlString.trim();
+
+            // Add XML declaration if missing
+            if (!cleanXML.startsWith('<?xml')) {
+                cleanXML = '<?xml version="1.0" encoding="UTF-8"?>' + cleanXML;
+            }
+
+            // Wrap in feed tags if not present
+            if (!cleanXML.includes('<feed')) {
+                cleanXML = cleanXML.replace('feed xmlns', '<feed xmlns');
+            }
+
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(cleanXML, 'text/xml');
+
+            // Check for parsing errors
+            const parseError = xmlDoc.getElementsByTagName('parsererror');
+            if (parseError.length > 0) {
+                console.log('Parse error, trying alternative method...');
+                parseXMLAlternative(xmlString);
+                return;
+            }
+
+            const entries = xmlDoc.getElementsByTagName('entry');
+            // console.log("entries : ", entries)
+            allData = [];
+
+            for (let i = 0; i < entries.length; i++) {
+                const entry = entries[i];
+                const data = extractData(entry);
+                allData.push(data);
+            }
+            console.log("allData : ", allData)
+
+            if (allData.length === 0) {
+                // Try to parse as single entry
+                const properties = xmlDoc.getElementsByTagName('m:properties');
+                if (properties.length > 0) {
+                    const data = extractDataFromProperties(properties[0]);
+                    allData.push(data);
+                }
+            }
+
+            displayData(allData);
+        }
+
+        function parseXMLAlternative(xmlString) {
+            allData = [];
+
+            // Extract data using regex for each entry
+            const entryRegex = /<entry[\s\S]*?<\/entry>/gi;
+            const entries = xmlString.match(entryRegex) || [];
+
+            if (entries.length === 0) {
+                // Try to extract properties directly
+                const data = extractDataRegex(xmlString);
+                if (data.orderId) {
+                    allData.push(data);
+                }
+            } else {
+                entries.forEach(entry => {
+                    const data = extractDataRegex(entry);
+                    allData.push(data);
+                });
+            }
+
+            displayData(allData);
+        }
+
+        function extractData(entry) {
+            // console.log("entry in extractData : ", entry)
+            const getValue = (tagName) => {
+                // console.log("tagName : ", tagName)
+                const elements = entry.getElementsByTagName('d:' + tagName);
+                if (elements.length > 0) {
+                    return elements[0].textContent || '';
+                }
+                return '';
+            };
+
+            return {
+                orderId: getValue('OrderId'),
+                customerId: getValue('CustomerId'),
+                customerName: getValue('CustomerName'),
+                customerAddress: getValue('CustomerAddress'),
+                customerPin: getValue('CustomerPin'),
+                customerPhone: getValue('CustomerTelephone'),
+                alternatePhone: getValue('CustomerAlternateNo'),
+                productDesc: getValue('ProductDesc') || getValue('ProductId'),
+                modelName: getValue('ModelName'),
+                status: getValue('StatusText'),
+                createdDate: formatDate(getValue('CallBookingDate') || getValue('LastChangedAt')),
+                appointmentDate: formatDate(getValue('ActualAppointment') || getValue('Appointmentdate')),
+                technician: getValue('TechnicianName'),
+                source: getValue('CallMedium'),
+                callPriority: getValue('CallPriority'),
+                isCallMade: getValue('CallAttemptFailedFlag') || 'N/A',
+                callStatus: getValue('StatusCode'),
+                callDetails: getValue('StatusReasonText') || getValue('RepeatCallReasonText') || ''
+            };
+        }
+
+        function extractDataFromProperties(properties) {
+            const getValue = (tagName) => {
+                const elements = properties.getElementsByTagName('d:' + tagName);
+                if (elements.length > 0) {
+                    return elements[0].textContent || '';
+                }
+                return '';
+            };
+
+            return {
+                orderId: getValue('OrderId'),
+                customerName: getValue('CustomerName'),
+                customerPin: getValue('CustomerPin'),
+                customerPhone: getValue('CustomerTelephone'),
+                alternatePhone: getValue('CustomerAlternateNo'),
+                productDesc: getValue('ProductDesc') || getValue('ProductId'),
+                modelName: getValue('ModelName'),
+                status: getValue('StatusText'),
+                createdDate: formatDate(getValue('CallBookingDate') || getValue('LastChangedAt')),
+                appointmentDate: formatDate(getValue('ActualAppointment') || getValue('Appointmentdate')),
+                technician: getValue('TechnicianName'),
+                source: getValue('CallMedium'),
+                callPriority: getValue('CallPriority'),
+                isCallMade: getValue('CallAttemptFailedFlag') || 'N/A',
+                callStatus: getValue('StatusCode'),
+                callDetails: getValue('StatusReasonText') || getValue('RepeatCallReasonText') || ''
+            };
+        }
+
+        function extractDataRegex(xmlString) {
+            const getValue = (tagName) => {
+                const regex = new RegExp(`<d:${tagName}[^>]*>([^<]*)<\/d:${tagName}>`, 'i');
+                const match = xmlString.match(regex);
+                return match ? match[1].trim() : '';
+            };
+
+            return {
+                orderId: getValue('OrderId'),
+                customerName: getValue('CustomerName'),
+                customerPin: getValue('CustomerPin'),
+                customerPhone: getValue('CustomerTelephone'),
+                alternatePhone: getValue('CustomerAlternateNo'),
+                productDesc: getValue('ProductDesc') || getValue('ProductId'),
+                modelName: getValue('ModelName'),
+                status: getValue('StatusText'),
+                createdDate: formatDate(getValue('CallBookingDate') || getValue('LastChangedAt')),
+                appointmentDate: formatDate(getValue('ActualAppointment') || getValue('Appointmentdate')),
+                technician: getValue('TechnicianName'),
+                source: getValue('CallMedium'),
+                callPriority: getValue('CallPriority'),
+                isCallMade: getValue('CallAttemptFailedFlag') || 'N/A',
+                callStatus: getValue('StatusCode'),
+                callDetails: getValue('StatusReasonText') || getValue('RepeatCallReasonText') || ''
+            };
+        }
+
+        function formatDate(dateString) {
+            if (!dateString || dateString === 'null') return 'N/A';
+
+            // Handle format: 20260121022045
+            if (/^\d{14}$/.test(dateString)) {
+                const year = dateString.substring(0, 4);
+                const month = dateString.substring(4, 6);
+                const day = dateString.substring(6, 8);
+                return `${day}-${month}-${year}`;
+            }
+
+            // Handle ISO format
+            if (dateString.includes('T')) {
+                const date = new Date(dateString);
+                if (!isNaN(date)) {
+                    return date.toLocaleDateString('en-GB');
+                }
+            }
+
+            return dateString;
+        }
+
+        function displayData(data) {
+            tableBody.innerHTML = '';
+            // console.log("data : ", data)
+
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="17" class="no-data">No data found in the file</td></tr>';
+                tableContainer.style.display = 'block';
+                return;
+            }
+
+            data.forEach((item, index) => {
+                const row = createTableRow(item, index + 1);
+                tableBody.appendChild(row);
+            });
+
+            recordCount.textContent = `${data.length} Record${data.length > 1 ? 's' : ''}`;
+            tableContainer.style.display = 'block';
+        }
+
+        function createTableRow(item, index) {
+            const row = document.createElement('tr');
+            // console.log("item : ", item)
+
+            const statusClass = getStatusClass(item.status);
+            const priorityClass = getPriorityClass(item.callPriority);
+
+            row.innerHTML = `
+                <td>${index}</td>
+                <td><strong>${item.orderId || 'N/A'}</strong></td>
+                <td><strong>${item.customerId || 'N/A'}</strong></td>
+                <td title="${item.customerName}">${item.customerName || 'N/A'}</td>
+                <td title="${item.customerAddress}">${item.customerAddress || 'N/A'}</td>
+                <td>${item.customerPin || 'N/A'}</td>
+                <td>${item.customerPhone || 'N/A'}</td>
+                <td>${item.alternatePhone || 'N/A'}</td>
+                <td title="${item.productDesc}">${truncate(item.productDesc, 20) || 'N/A'}</td>
+                <td>${item.modelName || 'N/A'}</td>
+                <td><span class="status-badge ${statusClass}">${item.status || 'N/A'}</span></td>
+                <td>${item.createdDate || 'N/A'}</td>
+                <td>${item.appointmentDate || 'N/A'}</td>
+                <td>${item.technician || 'N/A'}</td>
+                <td>${item.source || 'N/A'}</td>
+                <td><span class="status-badge ${priorityClass}">${item.callPriority || 'N/A'}</span></td>
+                <td>${item.isCallMade || 'N/A'}</td>
+                <td>${item.callStatus || 'N/A'}</td>
+                <td title="${item.callDetails}">${truncate(item.callDetails, 30) || 'N/A'}</td>
+            `;
+
+            return row;
+        }
+
+        function getStatusClass(status) {
+            if (!status) return '';
+            const s = status.toLowerCase();
+            if (s.includes('resolved') || s.includes('closed') || s.includes('complete')) return 'status-resolved';
+            if (s.includes('pending') || s.includes('wait')) return 'status-pending';
+            return 'status-open';
+        }
+
+        function getPriorityClass(priority) {
+            if (!priority) return '';
+            const p = priority.toLowerCase();
+            if (p.includes('high') || p.includes('urgent') || p.includes('critical')) return 'priority-high';
+            if (p.includes('medium') || p.includes('normal')) return 'priority-medium';
+            return 'priority-low';
+        }
+
+        function truncate(str, length) {
+            if (!str) return '';
+            return str.length > length ? str.substring(0, length) + '...' : str;
+        }
+
+        // Search functionality
+        searchBox.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredData = allData.filter(item => {
+                return Object.values(item).some(value =>
+                    String(value).toLowerCase().includes(searchTerm)
+                );
+            });
+            displayData(filteredData);
+        });
+
+        // function exportToCSV() {
+        // if (allData.length === 0) {
+        //     alert('No data to export!');
+        //     return;
+        // }
+
+        // const headers = ['Order', 'Customer', 'Pincode', 'Phone', 'Alternate Phone', 'Product', 'Machine', 'Status', 'Created Date', 'Appointment Date', 'Technician', 'Source', 'Call Priority', 'Is Call Made', 'Call Status', 'Call Details'];
+
+        // let csv = headers.join(',') + '\n';
+
+        // allData.forEach(item => {
+        //     const row = [
+        //         item.orderId,
+        //         `"${item.customerName}"`,
+        //         item.customerPin,
+        //         item.customerPhone,
+        //         item.alternatePhone,
+        //         `"${item.productDesc}"`,
+        //         `"${item.modelName}"`,
+        //         `"${item.status}"`,
+        //         item.createdDate,
+        //         item.appointmentDate,
+        //         `"${item.technician}"`,
+        //         item.source,
+        //         `"${item.callPriority}"`,
+        //         item.isCallMade,
+        //         item.callStatus,
+        //         `"${item.callDetails}"`
+        //     ];
+        //     csv += row.join(',') + '\n';
+        // });
+
+        // const blob = new Blob([csv], { type: 'text/csv' });
+        // const url = window.URL.createObjectURL(blob);
+        // const a = document.createElement('a');
+        // a.href = url;
+        // a.download = 'service_orders.csv';
+        // a.click();
+        // window.URL.revokeObjectURL(url);
+        // }
+
+        function exportToXLSX() {
+            if (allData.length === 0) {
+                alert('No data to export!');
+                return;
+            }
+
+            const headers = ['Order', 'CustomerId', 'Customer', 'Customer Address', 'Pincode', 'Phone', 'Alternate Phone', 'Product', 'Machine', 'Status', 'Created Date', 'Appointment Date', 'Technician', 'Source', 'Call Priority', 'Is Call Made', 'Call Status', 'Call Details'];
+
+            // Build rows array (array of arrays)
+            const rows = allData.map(item => [
+                item.orderId,
+                item.customerId,
+                item.customerName,
+                item.customerAddress,
+                item.customerPin,
+                item.customerPhone,
+                item.alternatePhone,
+                item.productDesc,
+                item.modelName,
+                item.status,
+                item.createdDate,
+                item.appointmentDate,
+                item.technician,
+                item.source,
+                item.callPriority,
+                item.isCallMade,
+                item.callStatus,
+                item.callDetails
+            ]);
+
+            // Combine headers + data
+            const worksheetData = [headers, ...rows];
+
+            // Create workbook and worksheet
+            const workbook = XLSX.utils.book_new();
+            const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+
+            // Optional: Auto-fit column widths based on content
+            const colWidths = headers.map((header, i) => {
+                const maxLength = Math.max(
+                    header.length,
+                    ...rows.map(row => (row[i] != null ? String(row[i]).length : 0))
+                );
+                return { wch: Math.min(maxLength + 2, 50) }; // cap at 50 chars
+            });
+            worksheet['!cols'] = colWidths;
+
+            // Append worksheet to workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Service Orders');
+
+            const date = fileName_date_format();
+
+            // Trigger download
+            XLSX.writeFile(workbook, `${date}.xlsx`);
+        }
+
+        function fileName_date_format(){
+            const date = new Date();
+
+            const options = {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true // Use 12-hour clock with AM/PM
+            };
+
+            // Use a specific locale (e.g., 'en-GB' for dd/mm/yyyy order)
+            const formattedDate = new Intl.DateTimeFormat('en-GB', options).format(date);
+
+            // The default separator for 'en-GB' is '/', but the user requested '-'
+            // We can replace the separator
+            const finalFormattedDate = formattedDate.replace(/\//g, '-').replace(',', '');
+
+            return finalFormattedDate;
+        }
+
+        function clearTable() {
+            allData = [];
+            tableBody.innerHTML = '';
+            tableContainer.style.display = 'none';
+            fileInput.value = '';
+            searchBox.value = '';
+        }
+    </script>
+</body>
+
+</html>
