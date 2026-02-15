@@ -714,7 +714,7 @@
                 // }
 
                 // console.log("vercelUrl + encodeURIComponent(targetUrl) : ", CONFIG.vercelProxy + encodeURIComponent(targetUrl))
-                return vercelUrl + encodeURIComponent(targetUrl);
+                return CONFIG.vercelProxy + encodeURIComponent(targetUrl);
             } else {
                 return CONFIG.publicProxy + encodeURIComponent(targetUrl);
             }
