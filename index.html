@@ -16,7 +16,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
         }
 
         .main-wrapper {
@@ -25,7 +25,7 @@
         }
 
         .navbar {
-            padding: 15px 30px;
+            padding: 10px 30px;
 
             background: rgba(255, 255, 255, 0.95);
             display: flex;
@@ -33,7 +33,7 @@
             align-items: center;
 
             border-radius: 15px;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             flex-wrap: wrap;
             gap: 15px;
@@ -52,13 +52,13 @@
 
         .content-flex {
             display: flex;
-            gap: 25px;
+            gap: 15px;
         }
 
         .container {
-            padding: 25px;
+            padding: 15px;
             margin: 0 auto;
-            width: 30%;
+            width: 35%;
             max-width: 1600px;
             height: fit-content;
 
@@ -82,8 +82,14 @@
         }
 
         .logo {
-            font-size: 60px;
-            margin-bottom: 15px;
+            font-size: 40px;
+            margin-bottom: 5px;
+            animation: bounce 2s infinite;
+        }
+
+        .container h1 {
+            font-size: 20px;
+            margin-bottom: 5px;
             animation: bounce 2s infinite;
         }
 
@@ -261,6 +267,66 @@
             box-shadow: 0 8px 25px rgba(240, 147, 251, 0.6);
         }
 
+
+
+        .btn {
+            padding: 10px 25px;
+            margin: 0 auto;
+            width: max-content;
+
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-open {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-open:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-icon {
+            font-size: 20px;
+        }
+
+        .btn-export {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-export:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-clear {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #da190b;
+            transform: translateY(-2px);
+        }
+
+
         .drop-zone {
             position: absolute;
             inset: 20px;
@@ -321,10 +387,9 @@
             padding: 20px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 
-            display: flex;
+            display: none;
             flex-direction: column;
             /* stack header on top, table below */
-            overflow: auto;
         }
 
         /* .table-container.visible {
@@ -332,11 +397,13 @@
         } */
 
         .table-header {
+            margin-bottom: 10px;
+
             flex-shrink: 0;
+            
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
             flex-wrap: wrap;
             gap: 15px;
         }
@@ -344,13 +411,14 @@
         .table-scroll-wrapper {
             margin-top: 10px;
 
-            min-height: 0;
+            height: 100%;
             /* crucial for flex children to shrink */
 
             flex: 1;
             overflow: auto;
             border: 1px solid #e0e0e0;
             border-radius: 8px;
+
         }
 
         .table-title {
@@ -373,63 +441,6 @@
             font-weight: bold;
         }
 
-        .btn {
-            padding: 10px 25px;
-            margin: 0 auto;
-            width: max-content;
-
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-open {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-open:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        .btn-icon {
-            font-size: 20px;
-        }
-
-        .btn-export {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .btn-export:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-        }
-
-        .btn-clear {
-            background: #f44336;
-            color: white;
-        }
-
-        .btn-clear:hover {
-            background: #da190b;
-            transform: translateY(-2px);
-        }
-
         table {
             width: max-content;
             min-width: 100%;
@@ -448,7 +459,7 @@
         th {
             position: sticky;
             top: 0;
-            
+
             padding: 15px 10px;
 
             z-index: 2;
@@ -1009,7 +1020,7 @@
 
             if (data.length === 0) {
                 tableBody.innerHTML = '<tr><td colspan="17" class="no-data">No data found in the file</td></tr>';
-                tableContainer.style.display = 'block';
+                tableContainer.style.display = 'flex';
                 return;
             }
 
@@ -1019,7 +1030,7 @@
             });
 
             recordCount.textContent = `${data.length} Record${data.length > 1 ? 's' : ''}`;
-            tableContainer.style.display = 'block';
+            tableContainer.style.display = 'flex';
         }
 
         function createTableRow(item, index) {
@@ -1211,7 +1222,6 @@
             tableContainer.style.display = 'none';
 
             tableBody.innerHTML = '';
-            tableContainer.style.display = 'none';
             fileInput.value = '';
             searchBox.value = '';
         }
