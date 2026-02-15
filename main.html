@@ -418,6 +418,14 @@
             if (file) processFile(file);
         });
 
+        window.addEventListener('message', function (e) {
+            if (e.data.type === 'capturedXML') {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(e.data.data, "text/xml");
+                displayXML(xmlDoc);
+            }
+        });
+
         function processFile(file) {
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -789,7 +797,7 @@
             XLSX.writeFile(workbook, `${date}.xlsx`);
         }
 
-        function fileName_date_format(){
+        function fileName_date_format() {
             const date = new Date();
 
             const options = {

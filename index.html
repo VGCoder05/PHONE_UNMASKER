@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XML Fetcher & Viewer - Service Orders</title>
+    <title>XML to Table Converter</title>
     <style>
         * {
             margin: 0;
@@ -16,23 +16,22 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
             padding: 20px;
         }
 
         .main-wrapper {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1600px;
         }
 
         .navbar {
-            background: rgba(255, 255, 255, 0.95);
             padding: 15px 30px;
+
+            background: rgba(255, 255, 255, 0.95);
             display: flex;
             justify-content: space-between;
             align-items: center;
+
             border-radius: 15px;
             margin-bottom: 25px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
@@ -51,55 +50,35 @@
             gap: 15px;
         }
 
-        .nav-link {
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .nav-link.active {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        }
-
-        .content-grid {
-            display: grid;
-            grid-template-columns: 400px 1fr;
+        .content-flex {
+            display: flex;
             gap: 25px;
         }
 
-        @media (max-width: 900px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
         .container {
+            padding: 25px;
+            margin: 0 auto;
+            width: 30%;
+            max-width: 1600px;
+            height: fit-content;
+
             background: rgba(255, 255, 255, 0.95);
             border-radius: 25px;
-            padding: 25px;
             box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
             text-align: center;
-            height: fit-content;
         }
 
         .preview-container {
+            position: relative;
+            padding: 25px;
+            width: 100%;
+            max-height: 90vh;
+
             background: rgba(255, 255, 255, 0.95);
             border-radius: 25px;
-            padding: 25px;
             box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
             text-align: left;
-            max-height: 90vh;
-            overflow-y: auto;
+            /* overflow-y: auto; */
         }
 
         .logo {
@@ -120,26 +99,41 @@
             }
         }
 
-        h1 {
-            color: #1a1a2e;
-            margin-bottom: 10px;
-            font-size: 24px;
-        }
-
-        h2 {
-            color: #1a1a2e;
-            margin-bottom: 20px;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
         .subtitle {
             color: #666;
             margin-bottom: 30px;
             font-size: 14px;
         }
+
+        .status-message {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-loading {
+            background: #cce5ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+        }
+
 
         .input-group {
             margin-bottom: 20px;
@@ -223,91 +217,177 @@
             color: #856404;
         }
 
-        /* Proxy Selection */
-        .proxy-section {
-            background: #f0f4ff;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-            text-align: left;
+
+        h1 {
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
-        .proxy-title {
-            font-size: 12px;
+        .nav-link {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
             font-weight: 600;
-            color: #667eea;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
         }
 
-        .proxy-options {
+        .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .nav-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(240, 147, 251, 0.4);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(240, 147, 251, 0.6);
+        }
+
+        .drop-zone {
+            position: absolute;
+            inset: 20px;
+
+            padding: 60px 40px;
+
+            background: white;
+            border: 3px dashed #667eea;
+            border-radius: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+
             display: flex;
             flex-direction: column;
-            gap: 8px;
-        }
-
-        .proxy-option {
-            display: flex;
             align-items: center;
-            gap: 8px;
-            cursor: pointer;
+            justify-content: center;
         }
 
-        .proxy-option input[type="radio"] {
-            accent-color: #667eea;
+        .drop-zone:hover {
+            background: #f0f4ff;
+            border-color: #764ba2;
+            transform: scale(1.02);
         }
 
-        .proxy-option label {
-            font-size: 13px;
-            color: #333;
-            cursor: pointer;
+        .drop-zone.dragover {
+            background: #e8f0fe;
+            border-color: #4CAF50;
+            border-style: solid;
         }
 
-        .custom-proxy-input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 12px;
-            margin-top: 8px;
+        .drop-zone-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .drop-zone-text {
+            font-size: 20px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .drop-zone-hint {
+            font-size: 14px;
+            color: #888;
+        }
+
+        .file-input {
             display: none;
         }
 
-        .custom-proxy-input:focus {
-            outline: none;
-            border-color: #667eea;
+        .table-container {
+            position: absolute;
+            inset: 20px;
+
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+
+            display: flex;
+            flex-direction: column;
+            /* stack header on top, table below */
+            overflow: auto;
         }
 
-        .custom-proxy-input.visible {
-            display: block;
+        /* .table-container.visible {
+            display: flex;
+        } */
+
+        .table-header {
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .table-scroll-wrapper {
+            margin-top: 10px;
+
+            min-height: 0;
+            /* crucial for flex children to shrink */
+
+            flex: 1;
+            overflow: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+
+        .table-title {
+            font-size: 24px;
+            color: #333;
+        }
+
+        #button {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+
+
+        .record-count {
+            background: #667eea;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
         }
 
         .btn {
-            width: 100%;
-            padding: 18px 25px;
+            padding: 10px 25px;
+            margin: 0 auto;
+            width: max-content;
+
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
+            border-radius: 8px;
             cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
             transition: all 0.3s ease;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .btn-fetch {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            color: white;
-        }
-
-        .btn-fetch:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(56, 239, 125, 0.4);
         }
 
         .btn-open {
@@ -330,47 +410,151 @@
             font-size: 20px;
         }
 
-        .status-message {
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: none;
-            align-items: center;
-            gap: 10px;
-            font-weight: 500;
-            font-size: 14px;
+        .btn-export {
+            background: #4CAF50;
+            color: white;
         }
 
-        .status-success {
+        .btn-export:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-clear {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #da190b;
+            transform: translateY(-2px);
+        }
+
+        table {
+            width: max-content;
+            min-width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            
+            padding: 15px 10px;
+
+            z-index: 2;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        td:hover {
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        tbody tr:hover {
+            background: #f5f5f5;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        tbody tr:nth-child(even):hover {
+            background: #f0f0f0;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .status-resolved {
             background: #d4edda;
             color: #155724;
-            border: 1px solid #c3e6cb;
         }
 
-        .status-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
         }
 
-        .status-loading {
+        .status-open {
             background: #cce5ff;
             color: #004085;
-            border: 1px solid #b8daff;
         }
 
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(0, 64, 133, 0.3);
-            border-top-color: #004085;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .priority-high {
+            background: #f8d7da;
+            color: #721c24;
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
+        .priority-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .priority-low {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .search-box {
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            width: 300px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .drop-zone {
+                padding: 40px 20px;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .table-header {
+                flex-direction: column;
+                align-items: stretch;
             }
         }
 
@@ -381,6 +565,7 @@
             align-items: center;
             justify-content: center;
             min-height: 300px;
+
             color: #888;
         }
 
@@ -393,154 +578,26 @@
         .preview-empty-text {
             font-size: 16px;
         }
-
-        .data-card {
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 4px solid #667eea;
-        }
-
-        .data-card-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #667eea;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .data-row {
-            display: flex;
-            padding: 8px 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .data-row:last-child {
-            border-bottom: none;
-        }
-
-        .data-label {
-            flex: 0 0 40%;
-            font-weight: 600;
-            color: #555;
-            font-size: 13px;
-        }
-
-        .data-value {
-            flex: 1;
-            color: #333;
-            font-size: 13px;
-            word-break: break-word;
-        }
-
-        .data-value.highlight {
-            background: #fff3cd;
-            padding: 2px 8px;
-            border-radius: 4px;
-            color: #856404;
-            font-weight: 600;
-        }
-
-        .raw-xml-section {
-            margin-top: 20px;
-        }
-
-        .raw-xml-toggle {
-            background: #e9ecef;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            color: #555;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .raw-xml-toggle:hover {
-            background: #dee2e6;
-        }
-
-        .raw-xml-content {
-            display: none;
-            margin-top: 15px;
-            background: #1a1a2e;
-            border-radius: 12px;
-            padding: 20px;
-            overflow-x: auto;
-        }
-
-        .raw-xml-content.visible {
-            display: block;
-        }
-
-        .raw-xml-content pre {
-            color: #38ef7d;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            white-space: pre-wrap;
-            word-break: break-all;
-            margin: 0;
-        }
-
-        .info-box {
-            background: #e3f2fd;
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
-            text-align: left;
-        }
-
-        .info-box-title {
-            font-size: 12px;
-            font-weight: 600;
-            color: #1565c0;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .info-box-text {
-            font-size: 12px;
-            color: #1976d2;
-            line-height: 1.6;
-        }
-
-        @media (max-width: 500px) {
-            .container {
-                padding: 20px 15px;
-            }
-
-            .data-row {
-                flex-direction: column;
-                gap: 5px;
-            }
-
-            .data-label {
-                flex: none;
-            }
-        }
     </style>
+
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
     <div class="main-wrapper">
-        <!-- Navigation Bar -->
+
+        <!-- Navigation Bar - Add to both files -->
         <nav class="navbar">
             <div class="nav-brand">🔧 IFB Service Tools</div>
+            <h1>📊 XML to Table Converter</h1>
             <div class="nav-links">
-                <a href="index.html" class="nav-link active">📊 XML Fetcher</a>
+                <a href="main.html" class="nav-link">📊 XML Parser</a>
                 <a href="xml_downloader.html" class="nav-link">📥 XML Downloader</a>
             </div>
         </nav>
 
-        <div class="content-grid">
-            <!-- Left Panel - Input Section -->
+        <div class="content-flex">
+            <!-- Left sidebar -->
             <div class="container">
                 <div class="logo">🎫</div>
                 <h1>Service Order Viewer</h1>
@@ -567,102 +624,87 @@
                     </div>
                 </div>
 
-                <!-- Proxy Selection -->
-                <div class="proxy-section">
-                    <div class="proxy-title">🔀 Select Proxy Method</div>
-                    <div class="proxy-options">
-                        <div class="proxy-option">
-                            <input type="radio" id="proxyPublic" name="proxyType" value="public" checked>
-                            <label for="proxyPublic">Public Proxy (corsproxy.io) - Quick Test</label>
-                        </div>
-                        <div class="proxy-option">
-                            <input type="radio" id="proxyVercel" name="proxyType" value="vercel">
-                            <label for="proxyVercel">Your Vercel Proxy - Production</label>
-                        </div>
-                        <input type="text" class="custom-proxy-input" id="vercelProxyUrl"
-                            placeholder="https://cors-proxy-three-livid.vercel.app/api/proxy?url=">
-                    </div>
-                </div>
-
-                <button class="btn btn-fetch" id="fetchBtn" onclick="fetchXMLData()">
-                    <span class="btn-icon">📡</span>
-                    Fetch & Preview Data
-                </button>
-
                 <button class="btn btn-open" onclick="openInBrowser()">
                     <span class="btn-icon">🌐</span>
                     Open URL in Browser
                 </button>
 
-                <div class="info-box">
-                    <div class="info-box-title">ℹ️ How It Works</div>
-                    <div class="info-box-text">
-                        1. Enter ticket number<br>
-                        2. URL is generated automatically<br>
-                        3. Click "Fetch" to get data via proxy<br>
-                        4. View formatted data on the right
-                    </div>
-                </div>
             </div>
 
-            <!-- Right Panel - Preview Section -->
             <div class="preview-container">
-                <h2>📄 Data Preview</h2>
 
-                <div id="previewContent">
-                    <div class="preview-empty">
-                        <div class="preview-empty-icon">📭</div>
-                        <div class="preview-empty-text">Enter a ticket number and click "Fetch" to see data</div>
-                    </div>
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-zone-icon">📁</div>
+                    <div class="drop-zone-text">Drag & Drop your XML file here</div>
+                    <div class="drop-zone-hint">or click to browse files</div>
+                    <input type="file" class="file-input" id="fileInput" accept=".xml,.txt">
                 </div>
 
-                <div class="raw-xml-section" id="rawXmlSection" style="display: none;">
-                    <button class="raw-xml-toggle" onclick="toggleRawXml()">
-                        <span>📝</span> Show/Hide Raw XML
-                    </button>
-                    <div class="raw-xml-content" id="rawXmlContent">
-                        <pre id="rawXmlText"></pre>
+                <div class="table-container" id="tableContainer">
+                    <div class="table-header">
+                        <h2 class="table-title">📋 Service Orders</h2>
+                        <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search orders...">
+                        <span class="record-count" id="recordCount">0 Records</span>
+                        <div id="button">
+                            <button class="btn btn-export" onclick="exportToXLSX()">📥 Export Excel</button>
+                            <button class="btn btn-clear" onclick="clearTable()">🗑️ Clear</button>
+                        </div>
+                    </div>
+
+                    <div class="table-scroll-wrapper">
+                        <table id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Order</th>
+                                    <th>CustomerId</th>
+                                    <th>Customer</th>
+                                    <th>Address</th>
+                                    <th>Pincode</th>
+                                    <th>Phone</th>
+                                    <th>Alternate Phone</th>
+                                    <th>Product</th>
+                                    <th>Machine</th>
+                                    <th>Status</th>
+                                    <th>Created Date</th>
+                                    <th>Appointment Date</th>
+                                    <th>Technician</th>
+                                    <th>Source</th>
+                                    <th>Call Priority</th>
+                                    <th>Is Call Made</th>
+                                    <th>Call Status</th>
+                                    <th>Call Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
     <script>
-        // ============================================
-        // CONFIGURATION - Change these as needed
-        // ============================================
-
-        const CONFIG = {
-            // Public CORS proxy (for testing)
-            publicProxy: 'https://corsproxy.io/?',
-
-            // Your Vercel proxy (replace with your actual URL after deploying)
-            vercelProxy: 'https://cors-proxy-three-livid.vercel.app/proxy?url=', // e.g., 'https://my-cors-proxy.vercel.app/api/proxy?url='
-
-            // Base URL for the API
-            baseUrl: 'https://ifbwebdpprd.ifbserv.com:44300/sap/opu/odata/sap/ZUI002_SRV/Headers',
-
-            // URL suffix
-            urlSuffix: '/Update1'
-        };
-
-        // ============================================
-        // DOM ELEMENTS
-        // ============================================
-
+        // Left side
         const orderInput = document.getElementById('orderNumber');
         const urlNumber = document.getElementById('urlNumber');
         const statusMessage = document.getElementById('statusMessage');
-        const previewContent = document.getElementById('previewContent');
-        const rawXmlSection = document.getElementById('rawXmlSection');
-        const rawXmlText = document.getElementById('rawXmlText');
-        const vercelProxyInput = document.getElementById('vercelProxyUrl');
+
+        // Right side
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const tableContainer = document.getElementById('tableContainer');
+        const tableBody = document.getElementById('tableBody');
+        const recordCount = document.getElementById('recordCount');
+        const searchBox = document.getElementById('searchBox');
+
+        let allData = [];
 
         // ============================================
-        // EVENT LISTENERS
+        // Left side
         // ============================================
-
         // Update URL preview on input change
         orderInput.addEventListener('input', function () {
             const value = this.value.replace(/[^0-9]/g, '');
@@ -670,24 +712,20 @@
             urlNumber.textContent = value || 'XXXXXXXXXX';
         });
 
-        // Show/hide Vercel proxy input based on selection
-        document.querySelectorAll('input[name="proxyType"]').forEach(radio => {
-            radio.addEventListener('change', function () {
-                if (this.value === 'vercel') {
-                    vercelProxyInput.classList.add('visible');
-                } else {
-                    vercelProxyInput.classList.remove('visible');
-                }
-            });
-        });
 
         // Enter key to fetch
         orderInput.addEventListener('keypress', function (e) {
+            const orderNum = orderInput.value;
             if (e.key === 'Enter') {
-                fetchXMLData();
+
+                // Validation
+                if (!orderNum) {
+                    showStatus('error', 'Please enter a ticket number');
+                    return;
+                }
+                openInBrowser();
             }
         });
-
         // ============================================
         // HELPER FUNCTIONS
         // ============================================
@@ -696,28 +734,7 @@
         function getTargetURL() {
             const orderNum = orderInput.value;
             if (!orderNum) return null;
-            return `${CONFIG.baseUrl}('${orderNum}')${CONFIG.urlSuffix}`;
-        }
-
-        // Get the full proxied URL
-        function getProxiedURL() {
-            const targetUrl = getTargetURL();
-            if (!targetUrl) return null;
-
-            const proxyType = document.querySelector('input[name="proxyType"]:checked').value;
-
-            if (proxyType === 'vercel') {
-                vercelProxyInput.value = CONFIG.vercelProxy + encodeURIComponent(targetUrl);
-                // if (!vercelUrl) {
-                //     showStatus('error', 'Please enter your Vercel proxy URL');
-                //     return null;
-                // }
-
-                // console.log("vercelUrl + encodeURIComponent(targetUrl) : ", CONFIG.vercelProxy + encodeURIComponent(targetUrl))
-                return CONFIG.vercelProxy + encodeURIComponent(targetUrl);
-            } else {
-                return CONFIG.publicProxy + encodeURIComponent(targetUrl);
-            }
+            return `https://ifbwebdpprd.ifbserv.com:44300/sap/opu/odata/sap/ZUI002_SRV/Headers('${orderNum}')/Update1`;
         }
 
         // Show status message
@@ -742,278 +759,6 @@
             statusMessage.style.display = 'none';
         }
 
-        // ============================================
-        // MAIN FETCH FUNCTION
-        // ============================================
-
-        async function fetchXMLData() {
-            const orderNum = orderInput.value;
-
-            // Validation
-            if (!orderNum) {
-                showStatus('error', 'Please enter a ticket number');
-                return;
-            }
-
-            const proxiedUrl = getProxiedURL();
-            if (!proxiedUrl) return;
-
-            showStatus('loading', 'Fetching data via proxy...');
-
-            try {
-                // STEP 1: Fetch through proxy
-                const response = await fetch(proxiedUrl);
-
-                // console.log("proxiedUrl : ", proxiedUrl)
-                // console.log("response : ", response)
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-                // STEP 2: Get XML text
-                const xmlText = await response.text();
-
-                // STEP 3: Parse XML
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-
-                // Check for parse errors
-                const parseError = xmlDoc.querySelector('parsererror');
-                if (parseError) {
-                    throw new Error('Invalid XML received');
-                }
-
-                // STEP 4: Display the data
-                displayData(xmlDoc, xmlText);
-
-                showStatus('success', `Data fetched successfully for ticket: ${orderNum}`);
-
-            } catch (error) {
-                console.error('Fetch error:', error);
-
-                let errorMsg = error.message;
-                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                    errorMsg = 'Network error. The proxy might be blocked or unavailable.';
-                }
-
-                showStatus('error', errorMsg);
-
-                // Show error in preview
-                previewContent.innerHTML = `
-                    <div class="preview-empty">
-                        <div class="preview-empty-icon">❌</div>
-                        <div class="preview-empty-text">Error: ${errorMsg}</div>
-                    </div>
-                `;
-            }
-        }
-
-        // ============================================
-        // DISPLAY FUNCTION - Customize this!
-        // ============================================
-
-        function displayData(xmlDoc, rawXml) {
-            // Store raw XML for toggle
-            rawXmlText.textContent = formatXml(rawXml);
-            rawXmlSection.style.display = 'block';
-
-            // Extract data from XML
-            // You'll need to customize these based on your actual XML structure
-            const data = extractDataFromXml(xmlDoc);
-
-            // Build the preview HTML
-            let html = '';
-
-            // Basic Information Card
-            if (Object.keys(data.basic).length > 0) {
-                html += `
-                    <div class="data-card">
-                        <div class="data-card-title">📋 Basic Information</div>
-                        ${buildDataRows(data.basic)}
-                    </div>
-                `;
-            }
-
-            // Customer Information Card
-            if (Object.keys(data.customer).length > 0) {
-                html += `
-                    <div class="data-card">
-                        <div class="data-card-title">👤 Customer Details</div>
-                        ${buildDataRows(data.customer)}
-                    </div>
-                `;
-            }
-
-            // Product Information Card
-            if (Object.keys(data.product).length > 0) {
-                html += `
-                    <div class="data-card">
-                        <div class="data-card-title">📦 Product Details</div>
-                        ${buildDataRows(data.product)}
-                    </div>
-                `;
-            }
-
-            // Service Information Card
-            if (Object.keys(data.service).length > 0) {
-                html += `
-                    <div class="data-card">
-                        <div class="data-card-title">🔧 Service Details</div>
-                        ${buildDataRows(data.service)}
-                    </div>
-                `;
-            }
-
-            // All Fields Card (fallback)
-            if (Object.keys(data.allFields).length > 0 && html === '') {
-                html += `
-                    <div class="data-card">
-                        <div class="data-card-title">📄 All Data</div>
-                        ${buildDataRows(data.allFields)}
-                    </div>
-                `;
-            }
-
-            // If no data found
-            if (html === '') {
-                html = `
-                    <div class="preview-empty">
-                        <div class="preview-empty-icon">📭</div>
-                        <div class="preview-empty-text">No data found in the response</div>
-                    </div>
-                `;
-            }
-
-            previewContent.innerHTML = html;
-        }
-
-        // ============================================
-        // XML PARSING - Customize based on your XML!
-        // ============================================
-
-        function extractDataFromXml(xmlDoc) {
-            const data = {
-                basic: {},
-                customer: {},
-                product: {},
-                service: {},
-                allFields: {}
-            };
-
-            // Try to find the main content element
-            // Common patterns: entry > content > properties, or direct elements
-            let properties = xmlDoc.querySelector('m\\:properties, properties');
-
-            if (!properties) {
-                // Try to get all elements in the document
-                properties = xmlDoc.documentElement;
-            }
-
-            if (properties) {
-                // Get all child elements
-                const children = properties.children;
-
-                for (let i = 0; i < children.length; i++) {
-                    const element = children[i];
-                    const tagName = element.localName || element.tagName.replace(/^.*:/, '');
-                    const value = element.textContent.trim();
-
-                    // Skip empty values
-                    if (!value) continue;
-
-                    // Store in allFields
-                    data.allFields[tagName] = value;
-
-                    // Categorize based on field name (customize these!)
-                    const lowerTag = tagName.toLowerCase();
-
-                    // Basic fields
-                    if (lowerTag.includes('order') || lowerTag.includes('ticket') ||
-                        lowerTag.includes('id') || lowerTag.includes('number') ||
-                        lowerTag.includes('date') || lowerTag.includes('status') ||
-                        lowerTag.includes('type') || lowerTag.includes('priority')) {
-                        data.basic[tagName] = value;
-                    }
-                    // Customer fields
-                    else if (lowerTag.includes('customer') || lowerTag.includes('name') ||
-                        lowerTag.includes('phone') || lowerTag.includes('mobile') ||
-                        lowerTag.includes('email') || lowerTag.includes('address') ||
-                        lowerTag.includes('city') || lowerTag.includes('pin') ||
-                        lowerTag.includes('state')) {
-                        data.customer[tagName] = value;
-                    }
-                    // Product fields
-                    else if (lowerTag.includes('product') || lowerTag.includes('model') ||
-                        lowerTag.includes('serial') || lowerTag.includes('brand') ||
-                        lowerTag.includes('category') || lowerTag.includes('item') ||
-                        lowerTag.includes('material')) {
-                        data.product[tagName] = value;
-                    }
-                    // Service fields
-                    else if (lowerTag.includes('service') || lowerTag.includes('technician') ||
-                        lowerTag.includes('engineer') || lowerTag.includes('complaint') ||
-                        lowerTag.includes('problem') || lowerTag.includes('action') ||
-                        lowerTag.includes('remark') || lowerTag.includes('note')) {
-                        data.service[tagName] = value;
-                    }
-                }
-            }
-
-            return data;
-        }
-
-        // Build HTML rows for data
-        function buildDataRows(dataObj) {
-            let rows = '';
-            for (const [key, value] of Object.entries(dataObj)) {
-                const formattedKey = formatFieldName(key);
-                const isHighlight = key.toLowerCase().includes('status') ||
-                    key.toLowerCase().includes('priority');
-
-                rows += `
-                    <div class="data-row">
-                        <div class="data-label">${formattedKey}</div>
-                        <div class="data-value ${isHighlight ? 'highlight' : ''}">${value}</div>
-                    </div>
-                `;
-            }
-            return rows;
-        }
-
-        // Format field names (CamelCase to Title Case)
-        function formatFieldName(name) {
-            return name
-                .replace(/([A-Z])/g, ' $1')
-                .replace(/^./, str => str.toUpperCase())
-                .trim();
-        }
-
-        // Format XML for display
-        function formatXml(xml) {
-            let formatted = '';
-            let indent = '';
-            const tab = '  ';
-
-            xml.split(/>\s*</).forEach(node => {
-                if (node.match(/^\/\w/)) {
-                    indent = indent.substring(tab.length);
-                }
-                formatted += indent + '<' + node + '>\n';
-                if (node.match(/^<?\w[^>]*[^\/]$/) && !node.startsWith('?')) {
-                    indent += tab;
-                }
-            });
-
-            return formatted.substring(1, formatted.length - 2);
-        }
-
-        // Toggle raw XML view
-        function toggleRawXml() {
-            const content = document.getElementById('rawXmlContent');
-            content.classList.toggle('visible');
-        }
-
         // Open URL directly in browser
         function openInBrowser() {
             const targetUrl = getTargetURL();
@@ -1028,21 +773,448 @@
         }
 
         // ============================================
-        // INITIALIZE
+        // Right side
         // ============================================
 
-        document.addEventListener('DOMContentLoaded', function () {
-            // Load saved Vercel proxy URL if any
-            const savedProxy = localStorage.getItem('vercelProxyUrl');
-            if (savedProxy) {
-                vercelProxyInput.value = savedProxy;
+
+        // Drop zone events
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) processFile(file);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            dropZone.style.display = 'none';
+            tableContainer.style.display = 'flex';
+
+            const file = e.target.files[0];
+            if (file) processFile(file);
+        });
+
+        window.addEventListener('message', function (e) {
+            if (e.data.type === 'capturedXML') {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(e.data.data, "text/xml");
+                displayXML(xmlDoc);
+            }
+        });
+
+        function processFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                parseXML(content);
+            };
+            reader.readAsText(file);
+        }
+
+        function parseXML(xmlString) {
+            // Clean up the XML string
+            let cleanXML = xmlString.trim();
+
+            // Add XML declaration if missing
+            if (!cleanXML.startsWith('<?xml')) {
+                cleanXML = '<?xml version="1.0" encoding="UTF-8"?>' + cleanXML;
             }
 
-            // Save Vercel proxy URL on change
-            vercelProxyInput.addEventListener('change', function () {
-                localStorage.setItem('vercelProxyUrl', this.value);
+            // Wrap in feed tags if not present
+            if (!cleanXML.includes('<feed')) {
+                cleanXML = cleanXML.replace('feed xmlns', '<feed xmlns');
+            }
+
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(cleanXML, 'text/xml');
+
+            // Check for parsing errors
+            const parseError = xmlDoc.getElementsByTagName('parsererror');
+            if (parseError.length > 0) {
+                console.log('Parse error, trying alternative method...');
+                parseXMLAlternative(xmlString);
+                return;
+            }
+
+            const entries = xmlDoc.getElementsByTagName('entry');
+            // console.log("entries : ", entries)
+            allData = [];
+
+            for (let i = 0; i < entries.length; i++) {
+                const entry = entries[i];
+                const data = extractData(entry);
+                allData.push(data);
+            }
+            console.log("allData : ", allData)
+
+            if (allData.length === 0) {
+                // Try to parse as single entry
+                const properties = xmlDoc.getElementsByTagName('m:properties');
+                if (properties.length > 0) {
+                    const data = extractDataFromProperties(properties[0]);
+                    allData.push(data);
+                }
+            }
+
+            displayData(allData);
+        }
+
+        function parseXMLAlternative(xmlString) {
+            allData = [];
+
+            // Extract data using regex for each entry
+            const entryRegex = /<entry[\s\S]*?<\/entry>/gi;
+            const entries = xmlString.match(entryRegex) || [];
+
+            if (entries.length === 0) {
+                // Try to extract properties directly
+                const data = extractDataRegex(xmlString);
+                if (data.orderId) {
+                    allData.push(data);
+                }
+            } else {
+                entries.forEach(entry => {
+                    const data = extractDataRegex(entry);
+                    allData.push(data);
+                });
+            }
+
+            displayData(allData);
+        }
+
+        function extractData(entry) {
+            // console.log("entry in extractData : ", entry)
+            const getValue = (tagName) => {
+                // console.log("tagName : ", tagName)
+                const elements = entry.getElementsByTagName('d:' + tagName);
+                if (elements.length > 0) {
+                    return elements[0].textContent || '';
+                }
+                return '';
+            };
+
+            return {
+                orderId: getValue('OrderId'),
+                customerId: getValue('CustomerId'),
+                customerName: getValue('CustomerName'),
+                customerAddress: getValue('CustomerAddress'),
+                customerPin: getValue('CustomerPin'),
+                customerPhone: getValue('CustomerTelephone'),
+                alternatePhone: getValue('CustomerAlternateNo'),
+                productDesc: getValue('ProductDesc') || getValue('ProductId'),
+                modelName: getValue('ModelName'),
+                status: getValue('StatusText'),
+                createdDate: formatDate(getValue('CallBookingDate') || getValue('LastChangedAt')),
+                appointmentDate: formatDate(getValue('ActualAppointment') || getValue('Appointmentdate')),
+                technician: getValue('TechnicianName'),
+                source: getValue('CallMedium'),
+                callPriority: getValue('CallPriority'),
+                isCallMade: getValue('CallAttemptFailedFlag') || 'N/A',
+                callStatus: getValue('StatusCode'),
+                callDetails: getValue('StatusReasonText') || getValue('RepeatCallReasonText') || ''
+            };
+        }
+
+        function extractDataFromProperties(properties) {
+            const getValue = (tagName) => {
+                const elements = properties.getElementsByTagName('d:' + tagName);
+                if (elements.length > 0) {
+                    return elements[0].textContent || '';
+                }
+                return '';
+            };
+
+            return {
+                orderId: getValue('OrderId'),
+                customerName: getValue('CustomerName'),
+                customerPin: getValue('CustomerPin'),
+                customerPhone: getValue('CustomerTelephone'),
+                alternatePhone: getValue('CustomerAlternateNo'),
+                productDesc: getValue('ProductDesc') || getValue('ProductId'),
+                modelName: getValue('ModelName'),
+                status: getValue('StatusText'),
+                createdDate: formatDate(getValue('CallBookingDate') || getValue('LastChangedAt')),
+                appointmentDate: formatDate(getValue('ActualAppointment') || getValue('Appointmentdate')),
+                technician: getValue('TechnicianName'),
+                source: getValue('CallMedium'),
+                callPriority: getValue('CallPriority'),
+                isCallMade: getValue('CallAttemptFailedFlag') || 'N/A',
+                callStatus: getValue('StatusCode'),
+                callDetails: getValue('StatusReasonText') || getValue('RepeatCallReasonText') || ''
+            };
+        }
+
+        function extractDataRegex(xmlString) {
+            const getValue = (tagName) => {
+                const regex = new RegExp(`<d:${tagName}[^>]*>([^<]*)<\/d:${tagName}>`, 'i');
+                const match = xmlString.match(regex);
+                return match ? match[1].trim() : '';
+            };
+
+            return {
+                orderId: getValue('OrderId'),
+                customerName: getValue('CustomerName'),
+                customerPin: getValue('CustomerPin'),
+                customerPhone: getValue('CustomerTelephone'),
+                alternatePhone: getValue('CustomerAlternateNo'),
+                productDesc: getValue('ProductDesc') || getValue('ProductId'),
+                modelName: getValue('ModelName'),
+                status: getValue('StatusText'),
+                createdDate: formatDate(getValue('CallBookingDate') || getValue('LastChangedAt')),
+                appointmentDate: formatDate(getValue('ActualAppointment') || getValue('Appointmentdate')),
+                technician: getValue('TechnicianName'),
+                source: getValue('CallMedium'),
+                callPriority: getValue('CallPriority'),
+                isCallMade: getValue('CallAttemptFailedFlag') || 'N/A',
+                callStatus: getValue('StatusCode'),
+                callDetails: getValue('StatusReasonText') || getValue('RepeatCallReasonText') || ''
+            };
+        }
+
+        function formatDate(dateString) {
+            if (!dateString || dateString === 'null') return 'N/A';
+
+            // Handle format: 20260121022045
+            if (/^\d{14}$/.test(dateString)) {
+                const year = dateString.substring(0, 4);
+                const month = dateString.substring(4, 6);
+                const day = dateString.substring(6, 8);
+                return `${day}-${month}-${year}`;
+            }
+
+            // Handle ISO format
+            if (dateString.includes('T')) {
+                const date = new Date(dateString);
+                if (!isNaN(date)) {
+                    return date.toLocaleDateString('en-GB');
+                }
+            }
+
+            return dateString;
+        }
+
+        function displayData(data) {
+            tableBody.innerHTML = '';
+            // console.log("data : ", data)
+
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="17" class="no-data">No data found in the file</td></tr>';
+                tableContainer.style.display = 'block';
+                return;
+            }
+
+            data.forEach((item, index) => {
+                const row = createTableRow(item, index + 1);
+                tableBody.appendChild(row);
             });
+
+            recordCount.textContent = `${data.length} Record${data.length > 1 ? 's' : ''}`;
+            tableContainer.style.display = 'block';
+        }
+
+        function createTableRow(item, index) {
+            const row = document.createElement('tr');
+            // console.log("item : ", item)
+
+            const statusClass = getStatusClass(item.status);
+            const priorityClass = getPriorityClass(item.callPriority);
+
+            row.innerHTML = `
+                <td>${index}</td>
+                <td><strong>${item.orderId || 'N/A'}</strong></td>
+                <td><strong>${item.customerId || 'N/A'}</strong></td>
+                <td title="${item.customerName}">${item.customerName || 'N/A'}</td>
+                <td title="${item.customerAddress}">${item.customerAddress || 'N/A'}</td>
+                <td>${item.customerPin || 'N/A'}</td>
+                <td>${item.customerPhone || 'N/A'}</td>
+                <td>${item.alternatePhone || 'N/A'}</td>
+                <td title="${item.productDesc}">${truncate(item.productDesc, 20) || 'N/A'}</td>
+                <td>${item.modelName || 'N/A'}</td>
+                <td><span class="status-badge ${statusClass}">${item.status || 'N/A'}</span></td>
+                <td>${item.createdDate || 'N/A'}</td>
+                <td>${item.appointmentDate || 'N/A'}</td>
+                <td>${item.technician || 'N/A'}</td>
+                <td>${item.source || 'N/A'}</td>
+                <td><span class="status-badge ${priorityClass}">${item.callPriority || 'N/A'}</span></td>
+                <td>${item.isCallMade || 'N/A'}</td>
+                <td>${item.callStatus || 'N/A'}</td>
+                <td title="${item.callDetails}">${truncate(item.callDetails, 30) || 'N/A'}</td>
+            `;
+
+            return row;
+        }
+
+        function getStatusClass(status) {
+            if (!status) return '';
+            const s = status.toLowerCase();
+            if (s.includes('resolved') || s.includes('closed') || s.includes('complete')) return 'status-resolved';
+            if (s.includes('pending') || s.includes('wait')) return 'status-pending';
+            return 'status-open';
+        }
+
+        function getPriorityClass(priority) {
+            if (!priority) return '';
+            const p = priority.toLowerCase();
+            if (p.includes('high') || p.includes('urgent') || p.includes('critical')) return 'priority-high';
+            if (p.includes('medium') || p.includes('normal')) return 'priority-medium';
+            return 'priority-low';
+        }
+
+        function truncate(str, length) {
+            if (!str) return '';
+            return str.length > length ? str.substring(0, length) + '...' : str;
+        }
+
+        // Search functionality
+        searchBox.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredData = allData.filter(item => {
+                return Object.values(item).some(value =>
+                    String(value).toLowerCase().includes(searchTerm)
+                );
+            });
+            displayData(filteredData);
         });
+
+        // function exportToCSV() {
+        // if (allData.length === 0) {
+        //     alert('No data to export!');
+        //     return;
+        // }
+
+        // const headers = ['Order', 'Customer', 'Pincode', 'Phone', 'Alternate Phone', 'Product', 'Machine', 'Status', 'Created Date', 'Appointment Date', 'Technician', 'Source', 'Call Priority', 'Is Call Made', 'Call Status', 'Call Details'];
+
+        // let csv = headers.join(',') + '\n';
+
+        // allData.forEach(item => {
+        //     const row = [
+        //         item.orderId,
+        //         `"${item.customerName}"`,
+        //         item.customerPin,
+        //         item.customerPhone,
+        //         item.alternatePhone,
+        //         `"${item.productDesc}"`,
+        //         `"${item.modelName}"`,
+        //         `"${item.status}"`,
+        //         item.createdDate,
+        //         item.appointmentDate,
+        //         `"${item.technician}"`,
+        //         item.source,
+        //         `"${item.callPriority}"`,
+        //         item.isCallMade,
+        //         item.callStatus,
+        //         `"${item.callDetails}"`
+        //     ];
+        //     csv += row.join(',') + '\n';
+        // });
+
+        // const blob = new Blob([csv], { type: 'text/csv' });
+        // const url = window.URL.createObjectURL(blob);
+        // const a = document.createElement('a');
+        // a.href = url;
+        // a.download = 'service_orders.csv';
+        // a.click();
+        // window.URL.revokeObjectURL(url);
+        // }
+
+        function exportToXLSX() {
+            if (allData.length === 0) {
+                alert('No data to export!');
+                return;
+            }
+
+            const headers = ['Order', 'CustomerId', 'Customer', 'Customer Address', 'Pincode', 'Phone', 'Alternate Phone', 'Product', 'Machine', 'Status', 'Created Date', 'Appointment Date', 'Technician', 'Source', 'Call Priority', 'Is Call Made', 'Call Status', 'Call Details'];
+
+            // Build rows array (array of arrays)
+            const rows = allData.map(item => [
+                item.orderId,
+                item.customerId,
+                item.customerName,
+                item.customerAddress,
+                item.customerPin,
+                item.customerPhone,
+                item.alternatePhone,
+                item.productDesc,
+                item.modelName,
+                item.status,
+                item.createdDate,
+                item.appointmentDate,
+                item.technician,
+                item.source,
+                item.callPriority,
+                item.isCallMade,
+                item.callStatus,
+                item.callDetails
+            ]);
+
+            // Combine headers + data
+            const worksheetData = [headers, ...rows];
+
+            // Create workbook and worksheet
+            const workbook = XLSX.utils.book_new();
+            const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+
+            // Optional: Auto-fit column widths based on content
+            const colWidths = headers.map((header, i) => {
+                const maxLength = Math.max(
+                    header.length,
+                    ...rows.map(row => (row[i] != null ? String(row[i]).length : 0))
+                );
+                return { wch: Math.min(maxLength + 2, 50) }; // cap at 50 chars
+            });
+            worksheet['!cols'] = colWidths;
+
+            // Append worksheet to workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Service Orders');
+
+            const date = fileName_date_format();
+
+            // Trigger download
+            XLSX.writeFile(workbook, `${date}.xlsx`);
+        }
+
+        function fileName_date_format() {
+            const date = new Date();
+
+            const options = {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true // Use 12-hour clock with AM/PM
+            };
+
+            // Use a specific locale (e.g., 'en-GB' for dd/mm/yyyy order)
+            const formattedDate = new Intl.DateTimeFormat('en-GB', options).format(date);
+
+            // The default separator for 'en-GB' is '/', but the user requested '-'
+            // We can replace the separator
+            const finalFormattedDate = formattedDate.replace(/\//g, '-').replace(',', '');
+
+            return finalFormattedDate;
+        }
+
+        function clearTable() {
+            allData = [];
+            dropZone.style.display = 'flex';
+            tableContainer.style.display = 'none';
+
+            tableBody.innerHTML = '';
+            tableContainer.style.display = 'none';
+            fileInput.value = '';
+            searchBox.value = '';
+        }
     </script>
 </body>
 
